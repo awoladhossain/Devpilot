@@ -224,7 +224,7 @@ wheels = [
 ]
 
 [[package]]
-name = "devpailot"
+name = "devpilot"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

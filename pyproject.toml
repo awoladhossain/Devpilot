@@ -1,5 +1,5 @@
 [project]
-name = "devpailot"
+name = "devpilot"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
@@ -26,3 +26,6 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.fastapi]
+entrypoint = "app.main:app"
