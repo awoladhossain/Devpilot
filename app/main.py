@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.api.health import router as health_router
 
-
-@app.get("/health")
-def health_check() -> dict:
-    return {"status": "ok"}
+app = FastAPI(title="DevPilot", version="0.1.0")
+app.include_router(health_router)

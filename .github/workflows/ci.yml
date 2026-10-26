@@ -9,6 +9,20 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: devpilot
+          POSTGRES_PASSWORD: devpilot
+          POSTGRES_DB: devpilot
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U devpilot"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -17,4 +31,5 @@ jobs:
       - run: uv sync --locked
       - run: uv run ruff check .
       - run: uv run ruff format --check .
+      - run: uv run upgrade head
       - run: uv run pytest
