@@ -43,11 +43,7 @@ Start PostgreSQL:
 docker compose up -d
 ```
 
-Compose publishes Postgres on the host at `127.0.0.1:5435`. The example `DATABASE_URL` uses port `5432`, which is what CI uses. For a local Compose database, set this in `.env`:
-
-```text
-DATABASE_URL=postgresql+psycopg://devpilot:devpilot@localhost:5435/devpilot
-```
+Compose publishes Postgres on the host at `127.0.0.1:5435`, and `.env.example` uses that port. CI runs Postgres on `5432` and does not read `.env`; the fallback URL in `app/core/config.py` matches CI.
 
 Apply migrations:
 
@@ -80,7 +76,7 @@ uv run fastapi run
 | Method | Path | Purpose |
 |---|---|---|
 | `GET` | `/health` | Process is up. Returns `{"status": "ok"}`. |
-| `GET` | `/health/db` | Database accepts a query. Returns `{"status": "ok"}` or `{"status": "error"}`. |
+| `GET` | `/health/db` | Database accepts a query. HTTP 200 `{"status": "ok"}`, or HTTP 503 `{"status": "error"}` when the query fails. |
 
 Quick check after the server is running:
 
@@ -97,7 +93,7 @@ Settings are loaded from the environment and from `.env`. See `app/core/config.p
 |---|---|---|
 | `APP_ENV` | `local` | Application |
 | `LOG_LEVEL` | `INFO` | Application |
-| `DATABASE_URL` | `postgresql+psycopg://devpilot:devpilot@localhost:5432/devpilot` | Application and Alembic |
+| `DATABASE_URL` | `postgresql+psycopg://devpilot:devpilot@localhost:5432/devpilot` | Application and Alembic. `.env.example` uses port `5435` for local Compose. |
 | `POSTGRES_USER` | `devpilot` | Docker Compose |
 | `POSTGRES_PASSWORD` | `devpilot` | Docker Compose |
 | `POSTGRES_DB` | `devpilot` | Docker Compose |
