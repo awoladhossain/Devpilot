@@ -19,5 +19,5 @@ def health_db(db: Annotated[Session, Depends(get_db)]) -> dict[str, str]:
     try:
         db.execute(text("SELECT 1"))
         return {"status": "ok"}
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
+    except Exception:
+        return {"status": "error"}
