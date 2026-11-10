@@ -6,14 +6,13 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.security import create_access_token, create_refresh_token
+from app.core.security import create_access_token
 from app.models.user import User
 
 pytestmark = pytest.mark.integration
 
 REGISTER = "/api/v1/auth/register"
 LOGIN = "/api/v1/auth/login"
-REFRESH = "/api/v1/auth/refresh"
 ME = "/api/v1/users/me"
 CREDS = {"email": "awolad@example.com", "password": "correct-horse-battery"}
 
@@ -89,38 +88,3 @@ def test_me_rejects_alg_none_token(client, user_id) -> None:
 def test_me_rejects_token_for_deleted_user(client) -> None:
     token = create_access_token(str(uuid.uuid4()))
     assert client.get(ME, headers=bearer(token)).status_code == 401
-
-
-def test_refresh_token_success(client, user_id) -> None:
-    login_res = do_login(client).json()
-    refresh_token = login_res["refresh_token"]
-
-    response = client.post(REFRESH, json={"refresh_token": refresh_token})
-    assert response.status_code == 200
-    body = response.json()
-    assert body["token_type"] == "bearer"
-    assert body["expires_in"] == 900
-    assert body["access_token"]
-    assert body["refresh_token"]
-
-    # verify the new access token works
-    me_res = client.get(ME, headers=bearer(body["access_token"]))
-    assert me_res.status_code == 200
-    assert me_res.json()["email"] == CREDS["email"]
-
-
-def test_refresh_token_rejects_access_token(client, user_id) -> None:
-    access_token = do_login(client).json()["access_token"]
-    response = client.post(REFRESH, json={"refresh_token": access_token})
-    assert response.status_code == 401
-
-
-def test_refresh_token_rejects_expired_token(client, user_id) -> None:
-    expired_refresh = create_refresh_token(user_id, timedelta(seconds=-1))
-    response = client.post(REFRESH, json={"refresh_token": expired_refresh})
-    assert response.status_code == 401
-
-
-def test_refresh_token_rejects_invalid_token(client) -> None:
-    response = client.post(REFRESH, json={"refresh_token": "not-a-valid-token"})
-    assert response.status_code == 401

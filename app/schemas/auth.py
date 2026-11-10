@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TokenResponse(BaseModel):
@@ -8,5 +8,8 @@ class TokenResponse(BaseModel):
     expires_in: int
 
 
-class RefreshTokenRequest(BaseModel):
-    refresh_token: str
+class RefreshRequest(BaseModel):
+    refresh_token: str = Field(min_length=20, max_length=512)
+
+
+RefreshTokenRequest = RefreshRequest

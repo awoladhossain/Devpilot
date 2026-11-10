@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from datetime import UTC, datetime, timedelta
 
 import jwt
@@ -70,3 +72,11 @@ def decode_refresh_token(token: str) -> str | None:
     if payload.get("type") != "refresh" or not isinstance(subject, str):
         return None
     return subject
+
+
+def generate_refresh_token() -> str:
+    return secrets.token_urlsafe(48)
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()

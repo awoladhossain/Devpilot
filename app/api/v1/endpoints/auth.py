@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.auth import RefreshTokenRequest, TokenResponse
+from app.schemas.auth import RefreshRequest, TokenResponse
 from app.schemas.user import UserCreate, UserRead
 from app.services.auth import AuthService
 from app.services.user import UserService
@@ -35,12 +35,21 @@ def login(
     service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> TokenResponse:
     user = service.authenticate(form.username, form.password)
-    return service.issue_access_token(user)
+    return service.issue_tokens(user)
 
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(
-    data: RefreshTokenRequest,
+    data: RefreshRequest,
     service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> TokenResponse:
     return service.refresh(data.refresh_token)
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(
+    data: RefreshRequest,
+    service: Annotated[AuthService, Depends(get_auth_service)],
+) -> Response:
+    service.logout(data.refresh_token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

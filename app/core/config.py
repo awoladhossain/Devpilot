@@ -6,6 +6,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEV_SECRET_KEY = "dev-only-insecure-secret-do-not-use-in-prod"
 
+REFRESH_TOKEN_EXPIRE_DAYS: int = 14
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -17,6 +19,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 15
     refresh_token_expire_minutes: int = 60 * 24 * 30  # 30 days
+    refresh_token_expire_days: int = 14
 
     @model_validator(mode="after")
     def check_secret_key(self) -> Self:
