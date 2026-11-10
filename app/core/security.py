@@ -32,14 +32,6 @@ def create_access_token(subject: str, expires_delta: timedelta | None = None) ->
     return jwt.encode(payload, settings.secret_key, algorithm=settings.jwt_algorithm)
 
 
-def create_refresh_token(subject: str, expires_delta: timedelta | None = None) -> str:
-    settings = get_settings()
-    now = datetime.now(UTC)
-    lifetime = expires_delta or timedelta(minutes=settings.refresh_token_expire_minutes)
-    payload = {"sub": subject, "iat": now, "exp": now + lifetime, "type": "refresh"}
-    return jwt.encode(payload, settings.secret_key, algorithm=settings.jwt_algorithm)
-
-
 def decode_access_token(token: str) -> str | None:
     settings = get_settings()
     try:
@@ -53,23 +45,6 @@ def decode_access_token(token: str) -> str | None:
         return None
     subject = payload.get("sub")
     if payload.get("type") != "access" or not isinstance(subject, str):
-        return None
-    return subject
-
-
-def decode_refresh_token(token: str) -> str | None:
-    settings = get_settings()
-    try:
-        payload = jwt.decode(
-            token,
-            settings.secret_key,
-            algorithms=[settings.jwt_algorithm],
-            options={"require": ["exp", "sub"]},
-        )
-    except jwt.PyJWTError:
-        return None
-    subject = payload.get("sub")
-    if payload.get("type") != "refresh" or not isinstance(subject, str):
         return None
     return subject
 

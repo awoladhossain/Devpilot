@@ -18,8 +18,7 @@ class Settings(BaseSettings):
     secret_key: str = DEV_SECRET_KEY
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 15
-    refresh_token_expire_minutes: int = 60 * 24 * 30  # 30 days
-    refresh_token_expire_days: int = 14
+    refresh_token_expire_days: int = REFRESH_TOKEN_EXPIRE_DAYS
 
     @model_validator(mode="after")
     def check_secret_key(self) -> Self:

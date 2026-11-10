@@ -38,9 +38,7 @@ class AuthService:
         return user
 
     def issue_tokens(self, user: User) -> TokenResponse:
-        response = self._build_response(user.id, family_id=uuid.uuid4())
-        self.db.commit()
-        return response
+        return self._build_response(user.id, family_id=uuid.uuid4())
 
     issue_access_token = issue_tokens
 
@@ -63,15 +61,12 @@ class AuthService:
             raise UnauthorizedError(INVALID_REFRESH)
 
         row.revoked_at = now  # rotation: পুরোনোটা শেষ
-        response = self._build_response(user.id, family_id=row.family_id)
-        self.db.commit()
-        return response
+        return self._build_response(user.id, family_id=row.family_id)
 
     def logout(self, raw_token: str) -> None:
         row = self.tokens.get_by_hash_for_update(hash_token(raw_token))
         if row is not None and row.revoked_at is None:
             self.tokens.revoke_family(row.family_id, datetime.now(UTC))
-            self.db.commit()
 
     def _build_response(self, user_id: uuid.UUID, family_id: uuid.UUID) -> TokenResponse:
         settings = get_settings()
