@@ -1,11 +1,12 @@
 import uuid
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import UnauthorizedError
+from app.core.rate_limit import InMemoryRateLimiter, get_rate_limiter
 from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.user import User
@@ -36,3 +37,11 @@ def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def client_ip(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
+ClientIP = Annotated[str, Depends(client_ip)]
+Limiter = Annotated[InMemoryRateLimiter, Depends(get_rate_limiter)]

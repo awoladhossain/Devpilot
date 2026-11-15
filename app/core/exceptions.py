@@ -45,6 +45,15 @@ class InternalServerError(AppError):
     code: str = "internal_server_error"
 
 
+class RateLimitError(AppError):
+    status_code: int = 429
+    code: str = "rate_limited"
+
+    def __init__(self, retry_after: int) -> None:
+        super().__init__("Too many requests. Please try again later.")
+        self.headers = {"Retry-After": str(retry_after)}
+
+
 def register_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def handle_app_error(_: Request, exc: AppError) -> JSONResponse:

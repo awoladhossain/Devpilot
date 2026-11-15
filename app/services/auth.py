@@ -31,7 +31,9 @@ class AuthService:
     def authenticate(self, email: str, password: str) -> User:
         user = self.users.get_by_email(email.strip().lower())
         if user is None:
-            verify_password(password, DUMMY_PASSWORD_HASH)  # timing সমান রাখতে
+            verify_password(
+                password, DUMMY_PASSWORD_HASH
+            )  # To match the timing of the password hash
             raise UnauthorizedError(INVALID_CREDENTIALS)
         if not verify_password(password, user.password_hash) or not user.is_active:
             raise UnauthorizedError(INVALID_CREDENTIALS)
@@ -49,7 +51,7 @@ class AuthService:
             raise UnauthorizedError(INVALID_REFRESH)
 
         if row.revoked_at is not None:
-            # revoked token আবার এসেছে: চুরির সম্ভাবনা, পুরো family বন্ধ
+            # revoked token has been re-issued: possibility of theft, whole family disabled
             self.tokens.revoke_family(row.family_id, now)
             self.db.commit()
             raise UnauthorizedError(INVALID_REFRESH)
@@ -60,7 +62,7 @@ class AuthService:
             self.db.commit()
             raise UnauthorizedError(INVALID_REFRESH)
 
-        row.revoked_at = now  # rotation: পুরোনোটা শেষ
+        row.revoked_at = now  # rotation: old token expired
         return self._build_response(user.id, family_id=row.family_id)
 
     def logout(self, raw_token: str) -> None:
