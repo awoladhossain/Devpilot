@@ -23,10 +23,8 @@ class UserService:
 
         user = User(email=data.email, password_hash=hash_password(data.password))
         try:
-            self.db.add(user)
-            self.db.commit()
+            self.users.add(user)
         except IntegrityError:
-            self.db.rollback()
             raise ConflictError("Email already registered") from None
 
         return user
